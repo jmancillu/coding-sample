@@ -1,0 +1,811 @@
+---------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+      name:  <unnamed>
+       log:  C:\Users\Jorge Mancilla\Documents\Stata Working Directory\Quantitative Methods II Final Project\Regressions for Final Paper.log
+  log type:  text
+ opened on:  14 Jan 2019, 17:03:28
+
+. ***********************************************************
+. ***********************************************************
+. ***********************************************************
+. *** This program takes the 2012 National Health and Nutrition Study (ENSANUT) data files
+. *** and runs linear regressions to obtain results for the SOCI 111 Final  Paper
+. ***
+. *** Stata Version: 11
+. ***
+. *** INPUT 1: prac_alim_inf_2012_f.dta // CHILD NUTRITIONAL PRACTICES DATASET
+. *** INPUT 2: General.dta // INDIVIDUAL-LEVEL DATASET WITH GENERAL INFORMATION
+. *** INPUT 3: Antropometria.dta // ANTHROPOMETRY INFORMATION FOR SUBSAMPLE OF INDIVIDUALS
+. *** INPUT 4: WHOStandards_Boys.csv // WHO CHILD GROTH STANDARDS (BOYS)
+. *** INPUT 5: WHOStandards_Girls.csv // WHO CHILD GROTH STANDARDS (GIRLS)
+. ***********************************************************
+. ***********************************************************
+. ***********************************************************
+. set memory 400m
+(409600k)
+
+. 
+. ***********************************************************
+. ***********************************************************
+. *** COMBINE ALL DATASETS TO FORM ANALYSIS FILE
+. ***********************************************************
+. ***********************************************************
+. 
+. ************************************
+. *** READ IN  CHILD NUTRITIONAL PRACTICES DATA
+. ************************************
+. use "prac_alim_inf_2012_f.dta", clear
+
+. desc
+
+Contains data from prac_alim_inf_2012_f.dta
+  obs:         6,254                          
+ vars:           185                          
+ size:     4,971,930 (98.8% of memory free)
+---------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+              storage  display     value
+variable name   type   format      label      variable label
+---------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+folio           str6   %6s                    
+code_upm        str5   %5s                    upm (unidad primaria de muestreo)
+est_dis         byte   %8.0g       est_dis    estrato de diseño
+est_urb         byte   %8.0g       est_urb    estrato de urbanidad
+est_marg        byte   %8.0g       est_marg   estrato de marginalidad
+est_var         int    %8.0g                   estrato para calcular varianzas
+entidad         byte   %8.0g                  código de entidad
+desc_ent        str34  %34s                   descripción de la entidad
+munici          str3   %3s                    municipío
+desc_mun        str49  %49s                   descripción del municipío
+locali          str4   %4s                    localidad
+desc_loc        str50  %50s                   descripción de la localidad
+area            byte   %8.0g       area       area (urbana-rural)
+region          byte   %8.0g       region     región geográfica
+indicef         float  %9.0g                  indice socioeconómico
+nsef            byte   %8.0g       nsef       nivel socioeconómico (terciles)
+nse5f           byte   %8.0g                  nivel socioeconómico (quintiles)
+nse10f          byte   %8.0g       nse10f     nivel socioeconómico (deciles)
+oportuni        byte   %8.0g       oportuni   beneficiarios de oportunidades
+afilia_1        byte   %8.0g       afilia_1   afiliación a servicios de salud
+fech_ter        long   %dD_m_Y                fecha de tÉrmino de entrevista
+intp_madre      byte   %8.0g       intp_madre
+                                              número de integrante en el hogar de la madre
+madre_edadanos  float  %9.0g                  edad de la madre en años
+ponderador      float  %9.0g                  ponderador niños
+intp            byte   %8.0g                  integrante. número de integrante del menor
+fech_nac        str10  %10s                   fecha de nacimiento del menor
+edadmeses       float  %9.0g                  edad del menor en meses
+edad_meses      byte   %8.0g                  edad del menor en meses completos
+edadanos        float  %9.0g                  edad del menor en años
+sexo            byte   %8.0g       sexo       sexo
+lacto           byte   %8.0g       lacto      ¿le dio pecho alguna vez a (nombre)?
+al002a          byte   %8.0g       al002a     ¿por qué no amamantó a (nombre)?  la fórmula es mejor
+al002b          byte   %8.0g       al002b     ¿por qué no amamantó a (nombre)?  creo que amamantar es demasiado inconvenien
+al002c          byte   %8.0g       al002c     ¿por qué no amamantó a (nombre)?  no me gusto
+al002d          byte   %8.0g       al002d     ¿por qué no amamantó a (nombre)?  no tuve leche
+al002e          byte   %8.0g       al002e     ¿por qué no amamantó a (nombre)?  quise ponerme a dieta o quise perder peso
+al002f          byte   %8.0g       al002f     ¿por qué no amamantó a (nombre)?  quise regresar a mi dieta habitual
+al002g          byte   %8.0g       al002g     ¿por qué no amamantó a (nombre)?  quise fumar igual o más de lo que debería s
+al002h          byte   %8.0g       al002h     ¿por qué no amamantó a (nombre)?  tenía muchas cosas que hacer
+al002i          byte   %8.0g       al002i     ¿por qué no amamantó a (nombre)?  tenía planeado regresar a la escuela
+al002j          byte   %8.0g       al002j     ¿por qué no amamantó a (nombre)?  alguien más lo amamantó
+al002k          byte   %8.0g       al002k     ¿por qué no amamantó a (nombre)?  quise conservar mi figura
+al002l          byte   %8.0g       al002l     ¿por qué no amamantó a (nombre)?  porque el papá de mi hijo no quiso
+al002m          byte   %8.0g       al002m     ¿por qué no amamantó a (nombre)?  porque la abuela de mi hijo no quiso
+al002n          byte   %8.0g       al002n     ¿por qué no amamantó a (nombre)?  quise usar anticonceptivos
+al002o          byte   %8.0g       al002o     ¿por qué no amamantó a (nombre)?  otros
+al002p          byte   %8.0g       al002p     ¿por qué no amamantó a (nombre)?  no sabe/no responde
+al002esp        str80  %80s                   especifique
+al003a          byte   %8.0g       al003a     ¿cuánto tiempo después de que nació (nombre) empezó usted a darle el pecho?
+al003b          byte   %8.0g                  ¿cuánto tiempo después de que nació (nombre) empezó usted a darle el pecho? tiem
+al004           byte   %8.0g       al004      en los primeros tres días después del nacimiento de (nombre), ¿le dio algo de be
+al004aa0        byte   %8.0g       al004aa0   ¿que le dío?  agua simple/sola
+al004ab         byte   %8.0g       al004ab    ¿que le dío?  agua con azúcar, con glucosa. con miel ó con piloncillo
+al004ac         byte   %8.0g       al004ac    ¿que le dío?  suero casero (agua con sal + azúcar)
+al004ad         byte   %8.0g       al004ad    ¿que le dío?  té u otra infusión
+al004ae         byte   %8.0g       al004ae    ¿que le dío?  miel sola
+al004af         byte   %8.0g       al004af    ¿que le dío?  aguamiel
+al004ag         byte   %8.0g       al004ag    ¿que le dío?  aceite
+al004ah         byte   %8.0g       al004ah    ¿que le dío?  leche (que no fuera de pecho ni fórmula)
+al004ai         byte   %8.0g       al004ai    ¿que le dío?  fórmula
+al004aj         byte   %8.0g       al004aj    ¿que le dío?  jugo de fruta
+al004ak         byte   %8.0g       al004ak    ¿que le dío?  sales de rehidratación oral
+al004al         byte   %8.0g       al004al    ¿que le dío?  no sabe/no responde
+al004am         byte   %8.0g       al004am    ¿que le dío?  otros
+al004aes        str80  %80s                   especifique
+al005           byte   %8.0g       al005      ¿aún le da pecho a (nombre)?
+lacto_ayer      byte   %8.0g       lacto_ayer
+                                              ¿ayer le dio pecho a (nombre) durante el día ó la noche?
+al007           byte   %8.0g       al007      ¿cuántas veces le dio pecho ayer en el dÍa? (desde que usted se levantó hasta qu
+al008           byte   %8.0g       al008      ¿cuántas veces le dio pecho anoche?  (desde que usted se fue a dormir hasta que
+al009           byte   %8.0g       al009      ¿le da pecho a su bebé cada vez que lo pide? ó sea, ¿a libre demanda?
+al010           byte   %8.0g       al010      ¿le da la leche de su pecho en biberón (mamila)?
+al011a          byte   %8.0g       al011a     ¿cuántos meses amamantó a (nombre)?
+al011b          byte   %8.0g                  ¿cuántos meses amamantó a (nombre)? tiempo en relación a la respuesta "al011a"
+al012           byte   %8.0g       al012      cuando nació (nombre), en el hospital o clínica le obsequiaron alguna cosa?
+al012aa0        byte   %8.0g       al012aa0   ¿que es lo que le obsequiaron?  fórmula infantil
+al012ab         byte   %8.0g       al012ab    ¿que es lo que le obsequiaron?  biberones
+al012ac         byte   %8.0g       al012ac    ¿que es lo que le obsequiaron?  chupones
+al012ad         byte   %8.0g       al012ad    ¿que es lo que le obsequiaron?  pezoneras u otro utensilio que le ayudaran a
+al012ae         byte   %8.0g       al012ae    ¿que es lo que le obsequiaron?  no sabe/no recuerda
+al013           byte   %8.0g       al013      ¿alguna vez alimentó a (nombre) con fórmula infantil?
+al014a          byte   %8.0g       al014a     ¿por qué decidió alimentar a (nombre) con fórmula infantil?  me quedé sin lec
+al014b          byte   %8.0g       al014b     ¿por qué decidió alimentar a (nombre) con fórmula infantil?  me enferme y no
+al014c          byte   %8.0g       al014c     ¿por qué decidió alimentar a (nombre) con fórmula infantil?  decidí alimentar
+al014d          byte   %8.0g       al014d     ¿por qué decidió alimentar a (nombre) con fórmula infantil?  decidí amamantar
+al014e          byte   %8.0g       al014e     ¿por qué decidió alimentar a (nombre) con fórmula infantil?  elegí la misma f
+al014f          byte   %8.0g       al014f     ¿por qué decidió alimentar a (nombre) con fórmula infantil?  escuché que la f
+al014g          byte   %8.0g       al014g     ¿por qué decidió alimentar a (nombre) con fórmula infantil?  vi anunciada la
+al014h          byte   %8.0g       al014h     ¿por qué decidió alimentar a (nombre) con fórmula infantil?  mi hijo tenía un
+al014i          byte   %8.0g       al014i     ¿por qué decidió alimentar a (nombre) con fórmula infantil?  elegí la misma f
+al014j          byte   %8.0g       al014j     ¿por qué decidió alimentar a (nombre) con fórmula infantil?  el doctor u otro
+al014k          byte   %8.0g       al014k     ¿por qué decidió alimentar a (nombre) con fórmula infantil?  porque me la rec
+al014l          byte   %8.0g       al014l     ¿por qué decidió alimentar a (nombre) con fórmula infantil?  uso la fórmula q
+al014m          byte   %8.0g       al014m     ¿por qué decidió alimentar a (nombre) con fórmula infantil?  otros
+al014n          byte   %8.0g       al014n     ¿por qué decidió alimentar a (nombre) con fórmula infantil?  no sabe/no respo
+al014esp        str37  %37s                   mencione el nombre del programa social o municipal
+al014es2        str80  %80s                   especifique
+agua            byte   %8.0g       agua       ¿en cualquier momento de ayer Ó de anoche le dio a (nombre) agua simple?
+suero           byte   %8.0g       suero      ¿en cualquier momento de ayer Ó de anoche le dio a (nombre) suero oral, gotas,
+leche_nohumana  byte   %8.0g       leche_nohumana
+                                              ¿en cualquier momento de ayer Ó de anoche le dio a (nombre) fórmula infantil, l
+leche_nohu~a_es str80  %80s                   especifique la marca de la leche
+leche_liconsa   byte   %8.0g       leche_liconsa
+                                              ¿en cualquier momento de ayer Ó de anoche le dio a (nombre) leche liconsa en po
+liquidos        byte   %8.0g       liquidos   ¿en cualquier momento de ayer Ó de anoche le dio a (nombre) agua endulzada, té
+liquidos_nutri  byte   %8.0g       liquidos_nutri
+                                              ¿en cualquier momento de ayer Ó de anoche le dio a (nombre) atole con agua, atol
+cereales        byte   %8.0g       cereales   ¿en cualquier momento de ayer Ó de anoche le dio a (nombre) sopa de pasta, arro
+frutas          byte   %8.0g       frutas     ¿en cualquier momento de ayer Ó de anoche le dio a (nombre) frutas, verduras (i
+carnes_rojas    byte   %8.0g       carnes_rojas
+                                              ¿en cualquier momento de ayer Ó de anoche le dio a (nombre) (enteras, picaditas
+carnes_blancas  byte   %8.0g       carnes_blancas
+                                              ¿en cualquier momento de ayer Ó de anoche le dio a (nombre) (enteros ó en puré)
+carnes_embuti~s byte   %8.0g       carnes_embutidos
+                                              ¿en cualquier momento de ayer Ó de anoche le dio a (nombre) (enteros ó en puré)
+huevo_entero    byte   %8.0g       huevo_entero
+                                              ¿en cualquier momento de ayer Ó de anoche le dio a (nombre) huevo entero, sólo
+huevo_clara     byte   %8.0g       huevo_clara
+                                              ¿en cualquier momento de ayer Ó de anoche le dio a (nombre) huevo sólo la clara
+lacteos         byte   %8.0g       lacteos    ¿en cualquier momento de ayer Ó de anoche le dio a (nombre) queso (cualquiera)
+nutrisano       byte   %8.0g       nutrisano
+                                              ¿en cualquier momento de ayer Ó de anoche le dio a (nombre) (la papilla del pro
+miscelaneos     byte   %8.0g       miscelaneos
+                                              ¿en cualquier momento de ayer Ó de anoche le dio a (nombre) frituras, galletas,
+aguac           byte   %8.0g       aguac       ¿cuál fue el primero que (nombre) tomó regularmente?
+agua_dm         byte   %8.0g       agua_dm     el agua simple ¿a qué edad comenzó (nombre) a tomarla regularmente?
+agua_m          byte   %8.0g                   el agua simple ¿a qué edad comenzó (nombre) a tomarla regularmente? tiempo en r
+sueroc          byte   %8.0g       sueroc     de suero oral, gotas, jarabes medicinales (vitaminas, minerales, medicinas) ¿cu
+suero_dm        byte   %8.0g       suero_dm   suero oral, gotas, jarabes medicinales (vitaminas, minerales, medicinas) ¿a qué
+suero_m         byte   %8.0g                  suero oral, gotas, jarabes medicinales (vitaminas, minerales, medicinas) ¿a qué
+leche_nohumanac byte   %8.0g       leche_nohumanac
+                                              de fórmula infantil, leche en polvo, otra leche ¿cuál fue el primero que (nombr
+leche_nohu~c_es str80  %80s                   especifique la marca de la leche
+leche_nohuma~dm byte   %8.0g       leche_nohumana_dm
+                                               fórmula infantil, leche en polvo, otra leche ¿a qué edad comenzó (nombre) a to
+leche_nohuma~_m byte   %8.0g                   fórmula infantil, leche en polvo, otra leche ¿a qué edad comenzó (nombre) a to
+leche_liconsac  byte   %8.0g       leche_liconsac
+                                              de leche liconsa en polvo, leche liconsa líquida. ¿cuál fue el primero que (nom
+leche_licons~dm byte   %8.0g       leche_liconsa_dm
+                                               leche liconsa en polvo, leche liconsa líquida. ¿a qué edad comenzó (nombre) a t
+leche_liconsa_m byte   %8.0g                   leche liconsa en polvo, leche liconsa líquida. ¿a qué edad comenzó (nombre) a t
+liquidosc       byte   %8.0g       liquidosc
+                                              de agua endulzada, té (simple ó endulzado), café con agua (simple ó endulzado),
+liquidos_dm     byte   %8.0g       liquidos_dm
+                                               agua endulzada, té (simple ó endulzado), café con agua (simple ó endulzado), re
+liquidos_m      byte   %8.0g                   agua endulzada, té (simple ó endulzado), café con agua (simple ó endulzado), re
+liquidos_nutric byte   %8.0g       liquidos_nutric
+                                               de atole con agua, atole con leche, otro cereal (como avena, tapioca, etc) con
+liquidos_nut~dm byte   %8.0g       liquidos_nutri_dm
+                                               atole con agua, atole con leche, otro cereal (como avena, tapioca, etc) con agu
+liquidos_nut~_m byte   %8.0g                   atole con agua, atole con leche, otro cereal (como avena, tapioca, etc) con agu
+cerealesc       byte   %8.0g       cerealesc
+                                              de (enteros ó en puré). sopa de pasta, arroz, tortillas, cereales industrializa
+cereales_dm     byte   %8.0g       cereales_dm
+                                               (enteros ó en puré). sopa de pasta, arroz, tortillas, cereales industrializados
+cereales_m      byte   %8.0g                   (enteros ó en puré). sopa de pasta, arroz, tortillas, cereales industrializados
+frutasc         byte   %8.0g       frutasc    de frutas, verduras (incluye envasados ó en frasco. no diga marcas) ¿cuál fue el
+frutas_dm       byte   %8.0g       frutas_dm
+                                               frutas, verduras (incluye envasados ó en frasco. no diga marcas) ¿a qué edad co
+frutas_m        byte   %8.0g                   frutas, verduras (incluye envasados ó en frasco. no diga marcas) ¿a qué edad co
+carnes_rojasc   byte   %8.0g       carnes_rojasc
+                                              de (enteras, picaditas ó en puré) (incluye envasados ó en frasco. no diga marca
+carnes_rojas_dm byte   %8.0g       carnes_rojas_dm
+                                               (enteras, picaditas ó en puré) (incluye envasados ó en frasco. no diga marcas).
+carnes_rojas_m  byte   %8.0g                   (enteras, picaditas ó en puré) (incluye envasados ó en frasco. no diga marcas).
+carnes_blancasc byte   %8.0g       carnes_blancasc
+                                              de (enteros ó en puré) (incluye envasados ó en frasco. no diga marcas). carne d
+carnes_blanc~dm byte   %8.0g       carnes_blancas_dm
+                                               (enteros ó en puré) (incluye envasados ó en frasco. no diga marcas). carne de p
+carnes_blanc~_m byte   %8.0g                   (enteros ó en puré) (incluye envasados ó en frasco. no diga marcas). carne de p
+carnes_embuti~c byte   %8.0g       carnes_embutidosc
+                                               (enteros ó en puré) (incluye envasados ó en frasco. no diga marcas). jamón ó sa
+carnes_embut~dm byte   %8.0g       carnes_embutidos_dm
+                                               (enteros ó en puré) (incluye envasados ó en frasco. no diga marcas). jamón ó sa
+carnes_embut~_m byte   %8.0g                   (enteros ó en puré) (incluye envasados ó en frasco. no diga marcas). jamón ó sa
+huevo_enteroc   byte   %8.0g       huevo_enteroc
+                                              de huevo entero, sólo la yema. ¿cuál fue el primero que (nombre) tomó regularmen
+huevo_entero_dm byte   %8.0g       huevo_entero_dm
+                                              huevo entero, sólo la yema. ¿a qué edad comenzó (nombre) a tomarlo regularmente
+huevo_entero_m  byte   %8.0g                  huevo entero, sólo la yema. ¿a qué edad comenzó (nombre) a tomarlo regularmente
+huevo_clarac    byte   %8.0g       huevo_clarac
+                                              de huevo sólo la clara ¿cuál fue el primero que (nombre) tomó regularmente?
+huevo_clara_dm  byte   %8.0g       huevo_clara_dm
+                                              huevo sólo la clara. ¿a qué edad comenzó (nombre) a tomarlo regularmente?
+huevo_clara_m   byte   %8.0g                  huevo sólo la clara. ¿a qué edad comenzó (nombre) a tomarlo regularmente? tiempo
+lacteosc        byte   %8.0g       lacteosc   de queso (cualquiera), yakult ó similares, yogurt, tipo danoninos. ¿cuál fue el
+lacteos_dm      byte   %8.0g       lacteos_dm
+                                               queso (cualquiera), yakult ó similares, yogurt, tipo danoninos. ¿a qué edad com
+lacteos_m       byte   %8.0g                   queso (cualquiera), yakult ó similares, yogurt, tipo danoninos. ¿a qué edad com
+nutrisanoc      byte   %8.0g       nutrisanoc
+                                              de (la papilla del programa oportunidades), los polvitos (micronutrimentos en
+nutrisano_dm    byte   %8.0g       nutrisano_dm
+                                               (la papilla del programa oportunidades), los polvitos (micronutrimentos en pol
+nutrisano_m     byte   %8.0g                   (la papilla del programa oportunidades), los polvitos (micronutrimentos en pol
+miscelaneosc    byte   %8.0g       miscelaneosc
+                                              de frituras, galletas, dulces ó pastelillos ¿cuál fue el primero que (nombre) to
+miscelaneos_dm  byte   %8.0g       miscelaneos_dm
+                                              frituras, galletas, dulces ó pastelillos ¿a qué edad comenzó (nombre) a tomarlo
+miscelaneos_m   byte   %8.0g                  frituras, galletas, dulces ó pastelillos ¿a qué edad comenzó (nombre) a tomarlo
+al030           byte   %8.0g       al030      ¿el dia de ayer Ó anoche (nombre) tomó algún alimento en biberón como: jugos, ce
+al031a          byte   %8.0g                  en el día de ayer, ¿cuántas veces le dio a (nombre) algún alimento ó preparación
+al031b          long   %12.0g                 en el día de ayer, ¿cuántas veces le dio a (nombre) algún alimento ó preparación
+al032           byte   %8.0g       al032      en el día de ayer ¿le agregó azÚcar a algunos de los alimentos ó bebidas que (no
+al033           byte   %8.0g       al033      ¿le agregó sal a algunos de los alimentos ó bebidas que (nombre) comió ó bebió a
+inicio_t        byte   %8.0g       inicio_t   inicio temprano de la lactancia materna. 0-23 meses
+exbre6m         byte   %8.0g       exbre6m    lactancia materna exclusiva < 6 meses
+lac_cont1y      byte   %8.0g       lac_cont1y
+                                              lactancia materna continua al año de vida, 12-15 meses
+alimopor        byte   %8.0g       alimopor   introducción de alimentos sólidos, semisólidos o suaves. 6-8 meses
+div_ali         byte   %8.0g       div_ali    diversidad alimentaria mínima. 6-23 meses
+div_ali1y       byte   %8.0g       div_ali1y
+                                              diversidad alimentaria mínima. 6 a 11 meses
+div_ali2y       byte   %8.0g       div_ali2y
+                                              diversidad alimentaria mínima. 12 a 23 meses
+frec_minima     byte   %8.0g       frec_minima
+                                              frecuencia mínima de comidas. 6-23 meses
+ali_hierro      byte   %8.0g       ali_hierro
+                                              consumo de alimentos ricos en hierro. 6-23 meses
+ali_hierro1y    byte   %8.0g       ali_hierro1y
+                                              consumo de alimentos ricos en hierro. 6 a 11 meses
+ali_hierro2y    byte   %8.0g       ali_hierro2y
+                                              consumo de alimentos ricos en hierro. 12 a 23 meses
+alguna_vez      byte   %8.0g       alguna_vez
+                                              niños que fueron amamantados alguna vez. 0-23 meses
+lac_cont2y      byte   %8.0g       lac_cont2y
+                                              lactancia materna continua a los 2 años. 20-23 meses
+lac_adec        byte   %8.0g       lac_adec   lactancia materna adecuada según la edad. 0-23 meses
+lac_adec1y      byte   %8.0g       lac_adec1y
+                                              lactancia materna adecuada según la edad. 0 a 11 meses
+lac_adec2y      byte   %8.0g       lac_adec2y
+                                              lactancia materna adecuada según la edad. 12 a 23 meses
+lac_pre         byte   %8.0g       lac_pre    lactancia materna predominante antes de los 6 meses
+biberon         byte   %8.0g       biberon    uso de biberón. cualquier alimento. 0-23 meses
+---------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+Sorted by:  
+
+. 
+. *** KEEP ONLY RELEVANT VARIABLES
+. keep folio /// Household ID Number
+>         code_upm /// Sampling Unit
+>         est_var /// Strata Area
+>         area /// Urban Area 
+>         nse10f /// Income Decile
+>         intp_madre /// Mom's ID Number 
+>         intp /// Child's ID Number
+>         edad_meses /// Child's age in months
+>         sexo /// Child's Sex
+>         inicio_t /// Child was breastfed within first hours of birth
+>         lac_adec /// Child is receiving adequate breastfeeding
+> 
+
+. *** SAVE ANALYSIS DATASET THAT INCLUDES ONLY THE RELEVANT VARIABLES
+. save "Analysis.dta", replace
+file Analysis.dta saved
+
+. clear
+
+.         
+. ************************************
+. *** READ IN INDIVIDUAL-LEVEL DATA
+. ************************************
+. use "General.dta", clear
+
+. 
+. *** KEEP ONLY RELEVANT VARIABLES
+. keep folio /// Household ID Number 
+>         intp /// Individual ID Number
+>         h212 /// Individual speaks indigenous language
+>         h218a /// Individual's education level
+> 
+
+. *** RENAME intp SO THAT CHILDREN ARE MATCHED TO THEIR MOTHER'S INFORMATION
+. rename intp intp_madre
+
+. 
+. *** MERGE MOTHER'S INDIVIDUAL-LEVEL DATA WITH CHILDREN'S NUTRITIONAL DATA.
+. merge 1:m folio intp_madre using "Analysis.dta"
+(label sexo already defined)
+
+    Result                           # of obs.
+    -----------------------------------------
+    not matched                       188,988
+        from master                   188,829  (_merge==1)
+        from using                        159  (_merge==2)
+
+    matched                             6,095  (_merge==3)
+    -----------------------------------------
+
+. drop if _merge == 1 
+(188829 observations deleted)
+
+. drop _merge
+
+. 
+. ************************************
+. *** MERGE WITH ANTHROPOMETRY DATA
+. ************************************
+. 
+. *** MERGE WITH ANTHROPOMETRY DATA. KEEP ONLY THE CHILD'S HEIGHT/LENGTH MEASUREMENT
+. merge 1:1 folio intp code_upm est_var using "Antropometria.dta", force keepusing(talla pondef) update 
+(label est_marg already defined)
+(label est_urb already defined)
+(label est_dis already defined)
+
+    Result                           # of obs.
+    -----------------------------------------
+    not matched                        79,649
+        from master                       306  (_merge==1)
+        from using                     79,343  (_merge==2)
+
+    matched                             5,948
+        not updated                     5,948  (_merge==3)
+        missing updated                     0  (_merge==4)
+        nonmissing conflict                 0  (_merge==5)
+    -----------------------------------------
+
+. ** talla is the child's height/length
+. ** pondef is the weight for individuals with anthropometry data.
+. 
+. assert _merge <= 3
+
+. drop if _merge == 2
+(79343 observations deleted)
+
+. drop _merge
+
+. 
+. ************************************
+. *** RESTRICT ANALYSIS FILE TO CHILDREN 24 MONTHS OLD OR YOUNGER
+. ************************************
+. keep if edad_meses <= 24
+(1969 observations deleted)
+
+. 
+. save "Analysis.dta", replace
+file Analysis.dta saved
+
+. desc
+
+Contains data from Analysis.dta
+  obs:         4,285                          
+ vars:            15                          14 Jan 2019 17:03
+ size:       149,975 (99.9% of memory free)
+---------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+              storage  display     value
+variable name   type   format      label      variable label
+---------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+folio           str6   %6s                    folio consecutivo
+intp_madre      byte   %8.0g                  número de integrante
+h212            byte   %8.0g       h212       ahora quiero preguntarle: ¿(usted/nombre) habla alguna lengua indígena?
+h218a           byte   %8.0g       h218a      ¿cuál es el último año y grado que aprobó (usted/nombre) en la escuela?
+code_upm        str5   %5s                    upm (unidad primaria de muestreo)
+est_var         int    %8.0g                   estrato para calcular varianzas
+area            byte   %8.0g       area       area (urbana-rural)
+nse10f          byte   %8.0g       nse10f     nivel socioeconómico (deciles)
+intp            byte   %8.0g                  integrante. número de integrante del menor
+edad_meses      byte   %8.0g                  edad del menor en meses completos
+sexo            byte   %8.0g       sexo       sexo
+inicio_t        byte   %8.0g       inicio_t   inicio temprano de la lactancia materna. 0-23 meses
+lac_adec        byte   %8.0g       lac_adec   lactancia materna adecuada según la edad. 0-23 meses
+talla           float  %9.0g       talla      longitud / talla
+pondef          float  %9.0g                  ponderador
+---------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+Sorted by:  
+
+. 
+. ***********************************************************
+. ***********************************************************
+. *** CONSTRUCT VARIABLES NEEDED FOR ANALYSIS
+. ***********************************************************
+. ***********************************************************
+. 
+. ************************************
+. *** STUNTING - DEPENDENT VARIABLE
+. ************************************
+. 
+. *** GET INFO FOR BOYS
+. insheet using "WHOStandards_Boys.csv", comma clear names
+(20 vars, 25 obs)
+
+. keep month sd p50
+
+. gen sexo = 1
+
+. 
+. save "WHO Standards.dta", replace
+file WHO Standards.dta saved
+
+. 
+. *** GET INFO FOR GIRLS
+. insheet using "WHOStandards_Girls.csv", comma clear names
+(20 vars, 25 obs)
+
+. keep month sd p50
+
+. gen sexo = 2
+
+. 
+. *** COMBINE INFO FOR BOYS AND GIRLS
+. append using "WHO Standards.dta"
+
+. 
+. *** CALCULATE 2 STANDARD DEVIATIONS UNDER MEAN
+. gen who_2sd = p50 - 2*sd
+
+. drop sd
+
+. save "WHO Standards.dta", replace
+file WHO Standards.dta saved
+
+. 
+. *** MERGE ANALYSIS DATASET WITH WHO STANDARDS
+. use "Analysis.dta", clear
+
+. rename edad_meses month
+
+. merge m:1 month sexo using "WHO Standards.dta"
+sexo was byte now float
+
+    Result                           # of obs.
+    -----------------------------------------
+    not matched                             0
+    matched                             4,285  (_merge==3)
+    -----------------------------------------
+
+. drop _merge 
+
+. 
+. *** IDENTIFY INFANTS WITH STUNTING
+. gen stunting = 1 if talla <= who_2sd
+(4006 missing values generated)
+
+. replace stunting = 0 if talla > who_2sd & talla < 222.2
+(3803 real changes made)
+
+. 
+. ************************************
+. *** FEMALE DUMMY
+. ************************************
+. codebook sexo
+
+---------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+sexo                                                                                                                                                                   sexo
+---------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+                  type:  numeric (float)
+                 label:  sexo
+
+                 range:  [1,2]                        units:  1
+         unique values:  2                        missing .:  0/4285
+
+            tabulation:  Freq.   Numeric  Label
+                          2110         1  hombre
+                          2175         2  mujer
+
+. gen female_dummy = sexo - 1
+
+. 
+. ************************************
+. *** URBAN HOUSEHOLD DUMMY
+. ************************************
+. codebook area
+
+---------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+area                                                                                                                                                    area (urbana-rural)
+---------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+                  type:  numeric (byte)
+                 label:  area
+
+                 range:  [1,2]                        units:  1
+         unique values:  2                        missing .:  0/4285
+
+            tabulation:  Freq.   Numeric  Label
+                          1645         1  rural
+                          2640         2  urbana
+
+. gen urban_dummy = area - 1
+
+. 
+. ************************************
+. *** INDIGENOUS MOTHER DUMMY
+. ************************************
+. codebook h212 
+
+---------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+h212                                                                                                ahora quiero preguntarle: ¿(usted/nombre) habla alguna lengua indígena?
+---------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+                  type:  numeric (byte)
+                 label:  h212
+
+                 range:  [1,2]                        units:  1
+         unique values:  2                        missing .:  91/4285
+
+            tabulation:  Freq.   Numeric  Label
+                           444         1  sí
+                          3750         2  no
+                            91         .  
+
+. recode h212 (2 = 0), gen(indigenous_dummy)
+(3750 differences between h212 and indigenous_dummy)
+
+. 
+. ************************************
+. *** INCOME DECILE 
+. ************************************
+. codebook nse10f
+
+---------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+nse10f                                                                                                                                       nivel socioeconómico (deciles)
+---------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+                  type:  numeric (byte)
+                 label:  nse10f, but 10 nonmissing values are not labeled
+
+                 range:  [1,10]                       units:  1
+         unique values:  10                       missing .:  0/4285
+
+              examples:  2     
+                         4     
+                         6     
+                         8     
+
+. gen incomedec = nse10f - 1
+
+. 
+. label define incomedec_lbl 0 "1st Decile" 1 "2nd Decile" 2 "3rd Decile" 3 "4th Decile"  ///
+>         4 "5th Decile" 5 "6th Decile" 6 "7th Decile" 7 "8th Decile" 8 "9th Decile" 9 "10th Decile"
+
+. label values incomedec incomedec_lbl
+
+. 
+. ************************************
+. *** MOTHER'S EDUCATION 
+. ************************************
+. codebook h218a
+
+---------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+h218a                                                                                               ¿cuál es el último año y grado que aprobó (usted/nombre) en la escuela?
+---------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+                  type:  numeric (byte)
+                 label:  h218a
+
+                 range:  [0,12]                       units:  1
+         unique values:  13                       missing .:  91/4285
+
+              examples:  2     primaria
+                         3     secundaria
+                         3     secundaria
+                         4     preparatoria o bachillerato
+
+. 
+. *** SOME ELEMENTARY SCHOOL DUMMY
+. gen es_dummy = 0
+
+. replace es_dummy = 1 if h218a == 2
+(1082 real changes made)
+
+. 
+. *** SOME MIDDLE SCHOOL DUMMY
+. gen ms_dummy = 0
+
+. replace ms_dummy = 1 if h218a == 3 | h218a == 6
+(1744 real changes made)
+
+. 
+. *** SOME HIGH SCHOOL SCHOOL DUMMY
+. gen hs_dummy = 0
+
+. replace hs_dummy = 1 if h218a == 4 | h218a == 7
+(827 real changes made)
+
+. 
+. *** SOME COLLEGE DUMMY
+. gen college_dummy = 0
+
+. replace college_dummy = 1 if h218a == 5 | (h218a > 8 & h218a < .)
+(362 real changes made)
+
+. 
+. ************************************
+. *** CHILD IS RECEIVING ADEQUATE BREASTFEEDING 
+. ************************************
+. codebook lac_adec
+
+---------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+lac_adec                                                                                                               lactancia materna adecuada según la edad. 0-23 meses
+---------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+                  type:  numeric (byte)
+                 label:  lac_adec
+
+                 range:  [0,1]                        units:  1
+         unique values:  2                        missing .:  188/4285
+
+            tabulation:  Freq.   Numeric  Label
+                          2923         0  no
+                          1174         1  si
+                           188         .  
+
+. gen breastfed_adeq_dummy = lac_adec
+(188 missing values generated)
+
+. 
+. ************************************
+. *** CHILD WAS BREASTFED DURING FIRST HOURS OF BIRTH DUMMY
+. ************************************
+. codebook inicio_t
+
+---------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+inicio_t                                                                                                                inicio temprano de la lactancia materna. 0-23 meses
+---------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+                  type:  numeric (byte)
+                 label:  inicio_t
+
+                 range:  [0,1]                        units:  1
+         unique values:  2                        missing .:  465/4285
+
+            tabulation:  Freq.   Numeric  Label
+                          2326         0  no
+                          1494         1  si
+                           465         .  
+
+. gen breastfed_initial_dummy = inicio_t
+(465 missing values generated)
+
+. 
+. ***********************************************************
+. ***********************************************************
+. *** REGRESSIONS
+. ***********************************************************
+. ***********************************************************
+. svyset[pw=pondef], psu(code_upm) strata(est_var) singleunit(centered)
+
+      pweight: pondef
+          VCE: linearized
+  Single unit: centered
+     Strata 1: est_var
+         SU 1: code_upm
+        FPC 1: <zero>
+
+. *** use weight from the anthropometry sample (pondef)
+. 
+. ************************************
+. *** MODEL #1
+. ************************************
+. svy: logit stunting month female_dummy urban_dummy indigenous_dummy incomedec es_dummy ms_dummy ///
+>         hs_dummy college_dummy  
+(running logit on estimation sample)
+
+Survey: Logistic regression
+
+Number of strata   =       155                  Number of obs      =      4002
+Number of PSUs     =      1404                  Population size    =   4090086
+                                                Design df          =      1249
+                                                F(   9,   1241)    =     10.58
+                                                Prob > F           =    0.0000
+
+------------------------------------------------------------------------------
+             |             Linearized
+    stunting |      Coef.   Std. Err.      t    P>|t|     [95% Conf. Interval]
+-------------+----------------------------------------------------------------
+       month |    .070715   .0110882     6.38   0.000     .0489614    .0924685
+female_dummy |  -.2016917   .2002311    -1.01   0.314    -.5945181    .1911347
+ urban_dummy |    .095042   .2008341     0.47   0.636    -.2989673    .4890514
+indigenous~y |   .8407755   .2192545     3.83   0.000     .4106276    1.270923
+   incomedec |  -.1216934   .0594038    -2.05   0.041    -.2382356   -.0051511
+    es_dummy |   -.790731   .4538931    -1.74   0.082    -1.681208    .0997461
+    ms_dummy |  -.8387834   .4957598    -1.69   0.091    -1.811397    .1338304
+    hs_dummy |  -.8769611    .552235    -1.59   0.113    -1.960372    .2064494
+college_du~y |  -1.197337   .6998998    -1.71   0.087    -2.570446    .1757719
+       _cons |  -2.332231   .4981814    -4.68   0.000    -3.309596   -1.354866
+------------------------------------------------------------------------------
+Note: strata with single sampling unit centered at overall mean.
+
+. 
+. ************************************
+. *** MODEL #2
+. ************************************
+. svy: logit stunting month female_dummy urban_dummy indigenous_dummy incomedec es_dummy ms_dummy ///
+>         hs_dummy college_dummy breastfed_adeq_dummy breastfed_initial_dummy ///
+>         c.incomedec#breastfed_adeq_dummy
+(running logit on estimation sample)
+
+Survey: Logistic regression
+
+Number of strata   =       155                  Number of obs      =      3588
+Number of PSUs     =      1369                  Population size    = 3662555.4
+                                                Design df          =      1214
+                                                F(  12,   1203)    =      7.72
+                                                Prob > F           =    0.0000
+
+------------------------------------------------------------------------------
+             |             Linearized
+    stunting |      Coef.   Std. Err.      t    P>|t|     [95% Conf. Interval]
+-------------+----------------------------------------------------------------
+       month |   .0790445    .012741     6.20   0.000     .0540477    .1040413
+female_dummy |   .0263444   .2114491     0.12   0.901    -.3885019    .4411907
+ urban_dummy |   .0321795   .2192717     0.15   0.883    -.3980141    .4623731
+indigenous~y |   .8111898   .2322445     3.49   0.000     .3555446    1.266835
+   incomedec |  -.1851804   .0721239    -2.57   0.010    -.3266818    -.043679
+    es_dummy |  -.8241187   .4233058    -1.95   0.052    -1.654611    .0063735
+    ms_dummy |  -.9086338   .4539902    -2.00   0.046    -1.799326   -.0179413
+    hs_dummy |  -1.284886   .5487733    -2.34   0.019    -2.361535   -.2082363
+college_du~y |   -1.52383   .7047546    -2.16   0.031    -2.906502   -.1411581
+brea~q_dummy |  -.6392209   .3633298    -1.76   0.079    -1.352045    .0736031
+brea~l_dummy |  -.4017181   .2031523    -1.98   0.048    -.8002867   -.0031495
+             |
+brea~q_dummy#|
+ c.incomedec |
+          1  |   .2340588   .1069411     2.19   0.029     .0242489    .4438687
+             |
+       _cons |  -2.091294   .5216594    -4.01   0.000    -3.114748    -1.06784
+------------------------------------------------------------------------------
+Note: strata with single sampling unit centered at overall mean.
+
+. 
+. *** CALCLULATE ODD RATIOS
+. svy: logistic stunting month female_dummy urban_dummy indigenous_dummy incomedec es_dummy ms_dummy ///
+>         hs_dummy college_dummy breastfed_adeq_dummy breastfed_initial_dummy ///
+>         c.incomedec#breastfed_adeq_dummy
+(running logistic on estimation sample)
+
+Survey: Logistic regression
+
+Number of strata   =       155                  Number of obs      =      3588
+Number of PSUs     =      1369                  Population size    = 3662555.4
+                                                Design df          =      1214
+                                                F(  12,   1203)    =      7.72
+                                                Prob > F           =    0.0000
+
+------------------------------------------------------------------------------
+             |             Linearized
+    stunting | Odds Ratio   Std. Err.      t    P>|t|     [95% Conf. Interval]
+-------------+----------------------------------------------------------------
+       month |   1.082252    .013789     6.20   0.000     1.055535    1.109646
+female_dummy |   1.026695   .2170937     0.12   0.901     .6780719    1.554557
+ urban_dummy |   1.032703   .2264426     0.15   0.883     .6716526    1.587838
+indigenous~y |   2.250584   .5226858     3.49   0.000     1.426958      3.5496
+   incomedec |   .8309544   .0599317    -2.57   0.010     .7213132    .9572612
+    es_dummy |   .4386214    .185671    -1.95   0.052     .1911664    1.006394
+    ms_dummy |   .4030745   .1829919    -2.00   0.046     .1654103    .9822187
+    hs_dummy |   .2766822   .1518358    -2.34   0.019     .0942754    .8120151
+college_du~y |   .2178758   .1535489    -2.16   0.031     .0546666     .868352
+brea~q_dummy |   .5277034   .1917304    -1.76   0.079     .2587107    1.076379
+brea~l_dummy |   .6691693   .1359433    -1.98   0.048     .4492001    .9968555
+             |
+brea~q_dummy#|
+ c.incomedec |
+          1  |   1.263719   .1351435     2.19   0.029     1.024545    1.558726
+------------------------------------------------------------------------------
+Note: strata with single sampling unit centered at overall mean.
+
+.         
+. log close
+      name:  <unnamed>
+       log:  C:\Users\Jorge Mancilla\Documents\Stata Working Directory\Quantitative Methods II Final Project\Regressions for Final Paper.log
+  log type:  text
+ closed on:  14 Jan 2019, 17:03:31
+---------------------------------------------------------------------------------------------------------------------------------------------------------------------------
